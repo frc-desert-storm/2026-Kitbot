@@ -11,9 +11,11 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
+import frc.robot.subsystems.beegshoot.Shooter;
 import frc.robot.subsystems.drive.*;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -26,6 +28,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
+  private final Shooter shooter;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -70,6 +73,8 @@ public class RobotContainer {
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
     // Configure the button bindings
+    shooter = new Shooter();
+
     configureButtonBindings();
   }
 
@@ -84,6 +89,19 @@ public class RobotContainer {
     drive.setDefaultCommand(
         DriveCommands.arcadeDrive(
             drive, () -> -controller.getLeftY(), () -> -controller.getRightX()));
+    controller
+        .rightTrigger()
+        .whileTrue(
+            new StartEndCommand(
+                () -> {
+                  shooter.SetShootySpeed(4500);
+                  shooter.SetFeedySpeed(-1000);
+                },
+                () -> {
+                  shooter.SetShootySpeed(0);
+                  shooter.SetFeedySpeed(0);
+                },
+                shooter));
   }
 
   /**
